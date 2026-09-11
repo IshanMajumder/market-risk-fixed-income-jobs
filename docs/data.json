@@ -1,8 +1,7 @@
 {
-  "generated_at": null,
+  "generated_at": "2026-09-11T22:09:50.813606+00:00",
   "min_salary_usd": 60000,
   "count": 0,
-  "unresolved_count": 0,
-  "jobs": [],
-  "note": "Placeholder — run the 'Refresh job site' GitHub Actions workflow once (Actions tab -> Run workflow) to populate this with real data."
+  "unresolved_count": 61,
+  "jobs": []
 }
