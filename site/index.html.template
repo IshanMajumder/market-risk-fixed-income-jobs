@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Market Risk / Fixed Income Analyst Jobs</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f7f7f8;
+    --surface: #ffffff;
+    --border: #e3e3e6;
+    --text: #1a1a1e;
+    --text-dim: #6b6b73;
+    --accent: #2f6feb;
+    --accent-bg: #eaf1fd;
+    --row-hover: #f2f5fb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214;
+      --surface: #1b1b1e;
+      --border: #2d2d31;
+      --text: #ececec;
+      --text-dim: #9b9ba3;
+      --accent: #6fa2f7;
+      --accent-bg: #1c2b45;
+      --row-hover: #202430;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px 48px;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin: 0 0 20px; }
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;
+  }
+  input[type=search], select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 14px;
+  }
+  input[type=search] { flex: 1 1 240px; min-width: 0; }
+  select { flex: 0 0 auto; }
+  .stat-row { display: flex; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+  .stat {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 14px; font-size: 13px; color: var(--text-dim);
+  }
+  .stat b { color: var(--text); font-size: 15px; display: block; }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 10px; overflow: hidden; }
+  thead th {
+    text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .03em;
+    color: var(--text-dim); border-bottom: 1px solid var(--border); padding: 10px 12px;
+    cursor: pointer; user-select: none; white-space: nowrap;
+  }
+  thead th:hover { color: var(--text); }
+  tbody td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 14px; }
+  tbody tr:hover { background: var(--row-hover); }
+  tbody tr:last-child td { border-bottom: none; }
+  a.title-link { color: var(--accent); text-decoration: none; font-weight: 600; }
+  a.title-link:hover { text-decoration: underline; }
+  .badge {
+    display: inline-block; background: var(--accent-bg); color: var(--accent);
+    border-radius: 6px; padding: 2px 8px; font-size: 12px; font-weight: 600;
+  }
+  .salary-listed { color: var(--text); }
+  .salary-none { color: var(--text-dim); font-style: italic; }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); }
+  footer { margin-top: 24px; font-size: 12px; color: var(--text-dim); text-align: center; }
+  /* Mobile: collapse table into stacked cards */
+  @media (max-width: 640px) {
+    table, thead { display: none; }
+    tbody, tr, td { display: block; width: 100%; }
+    tbody tr {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      margin-bottom: 10px; padding: 4px 0;
+    }
+    tbody td {
+      border-bottom: none; padding: 4px 14px;
+    }
+    tbody td::before {
+      content: attr(data-label);
+      display: block; font-size: 11px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 2px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Market Risk &amp; Fixed Income Analyst Jobs</h1>
+  <p class="subtitle" id="subtitle">Loading&hellip;</p>
+
+  <div class="stat-row" id="statRow"></div>
+
+  <div class="controls">
+    <input type="search" id="searchBox" placeholder="Search company, title, or location&hellip;">
+    <select id="sourceFilter"><option value="">All sources</option></select>
+    <select id="sortBy">
+      <option value="company">Sort: Company</option>
+      <option value="title">Sort: Title</option>
+      <option value="salary_min_usd_desc">Sort: Salary (high to low)</option>
+      <option value="posted_desc">Sort: Most recently posted</option>
+    </select>
+  </div>
+
+  <table id="jobsTable">
+    <thead>
+      <tr>
+        <th>Company</th>
+        <th>Title</th>
+        <th>Location</th>
+        <th>Salary</th>
+        <th>Source</th>
+      </tr>
+    </thead>
+    <tbody id="jobsBody"></tbody>
+  </table>
+  <div class="empty-state" id="emptyState" style="display:none;">No jobs match your filters right now.</div>
+
+  <footer>
+    Refreshes automatically every 4 hours via GitHub Actions. Scope: Market Risk Analyst &amp; Fixed Income Analyst
+    roles worldwide, salary &ge; $60,000 USD-equivalent or unlisted.
+  </footer>
+</div>
+
+<script>
+let ALL_JOBS = [];
+
+function escapeHtml(s) {
+  return (s || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function render() {
+  const q = document.getElementById('searchBox').value.trim().toLowerCase();
+  const source = document.getElementById('sourceFilter').value;
+  const sortBy = document.getElementById('sortBy').value;
+
+  let rows = ALL_JOBS.filter(j => {
+    if (source && j.source !== source) return false;
+    if (!q) return true;
+    const hay = `${j.company} ${j.title} ${j.location}`.toLowerCase();
+    return hay.includes(q);
+  });
+
+  if (sortBy === 'company') rows.sort((a,b) => a.company.localeCompare(b.company));
+  else if (sortBy === 'title') rows.sort((a,b) => a.title.localeCompare(b.title));
+  else if (sortBy === 'salary_min_usd_desc') rows.sort((a,b) => (b.salary_min_usd||0) - (a.salary_min_usd||0));
+  else if (sortBy === 'posted_desc') rows.sort((a,b) => (b.posted||'').localeCompare(a.posted||''));
+
+  const body = document.getElementById('jobsBody');
+  const empty = document.getElementById('emptyState');
+  body.innerHTML = '';
+  document.getElementById('jobsTable').style.display = rows.length ? '' : 'none';
+  empty.style.display = rows.length ? 'none' : '';
+
+  for (const j of rows) {
+    const tr = document.createElement('tr');
+    const salaryHtml = j.salary
+      ? `<span class="salary-listed">${escapeHtml(j.salary)}</span>`
+      : `<span class="salary-none">Not listed</span>`;
+    tr.innerHTML = `
+      <td data-label="Company">${escapeHtml(j.company)}</td>
+      <td data-label="Title"><a class="title-link" href="${escapeHtml(j.url)}" target="_blank" rel="noopener">${escapeHtml(j.title)}</a></td>
+      <td data-label="Location">${escapeHtml(j.location)}</td>
+      <td data-label="Salary">${salaryHtml}</td>
+      <td data-label="Source"><span class="badge">${escapeHtml(j.source)}</span></td>
+    `;
+    body.appendChild(tr);
+  }
+}
+
+fetch('data.json?_=' + Date.now())
+  .then(r => r.json())
+  .then(data => {
+    ALL_JOBS = data.jobs || [];
+    const generated = new Date(data.generated_at);
+    document.getElementById('subtitle').textContent =
+      `${data.count} open roles • last refreshed ${generated.toLocaleString()}`;
+
+    const sources = [...new Set(ALL_JOBS.map(j => j.source))].sort();
+    const sel = document.getElementById('sourceFilter');
+    for (const s of sources) {
+      const opt = document.createElement('option');
+      opt.value = s; opt.textContent = s;
+      sel.appendChild(opt);
+    }
+
+    const statRow = document.getElementById('statRow');
+    const withSalary = ALL_JOBS.filter(j => j.salary_min_usd).length;
+    statRow.innerHTML = `
+      <div class="stat"><b>${data.count}</b>Total matching roles</div>
+      <div class="stat"><b>${withSalary}</b>With disclosed salary</div>
+      <div class="stat"><b>${sources.length}</b>Companies/sources with hits</div>
+    `;
+
+    render();
+  })
+  .catch(err => {
+    document.getElementById('subtitle').textContent = 'Could not load data.json — ' + err;
+  });
+
+document.getElementById('searchBox').addEventListener('input', render);
+document.getElementById('sourceFilter').addEventListener('change', render);
+document.getElementById('sortBy').addEventListener('change', render);
+</script>
+</body>
+</html>
