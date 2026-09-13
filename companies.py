@@ -6,77 +6,67 @@ Each ATS type is queried via its public job-board API (no login needed):
   - Lever:      https://api.lever.co/v0/postings/{slug}?mode=json
   - Workday:    POST https://{tenant}.wd{n}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/jobs
 
-IMPORTANT: these slugs are best-effort guesses at large banks / asset managers /
-insurers / hedge funds that are known to use these three ATS platforms. Company
-career sites change their ATS and slugs over time, and a wrong slug simply
-returns a 404/empty result (main.py skips it silently and logs it under
-"unresolved sources" at the end of a run) -- it will NOT break the run.
+STATUS (updated after live verification via a real browser session):
+  - GREENHOUSE_COMPANIES and LEVER_COMPANIES below were verified live on
+    2026-09-13 by hitting the real APIs -- every slug in these two lists
+    returned a real board (200) at verification time. Company career sites
+    can still change ATS/slugs later, so treat this as "verified once," not
+    "guaranteed forever."
+  - WORKDAY_COMPANIES could NOT be verified in the same session: every
+    myworkdayjobs.com job-board tenant tested returned Workday's own
+    "Workday is currently unavailable / experiencing a service interruption"
+    page, while workday.com's marketing site loaded fine -- i.e. a real
+    outage of Workday's job-board hosting at verification time, not a bad
+    slug. These entries are still best-effort guesses and need re-checking
+    once Workday's job-board service is back up (open the company's real
+    careers page, click a job, and read tenant/site/wd# off the URL:
+    <tenant>.wd#.myworkdayjobs.com/<site>/job/...).
 
-You should treat this file as a living config: run main.py, check the
-"unresolved sources" section it prints, and fix/remove/add slugs as you learn
-the real ones (open the company's careers page, click a job, and look at the
-URL -- boards.greenhouse.io/<slug>/jobs/..., jobs.lever.co/<slug>/...,  or
-<tenant>.wd#.myworkdayjobs.com/<site>/job/...).
+Both main.py and site/build_site.py degrade safely around bad slugs: any
+company that 404s, times out, or returns nothing is silently skipped and
+listed under "unresolved sources" in the run's log -- a wrong guess never
+breaks a run, it just means that company contributes zero jobs.
 """
 
 # Greenhouse: boards-api.greenhouse.io/v1/boards/{slug}/jobs
+# Verified live (200 OK) on 2026-09-13.
 GREENHOUSE_COMPANIES = [
-    "twosigma",
-    "pointc72",
-    "aqr",
-    "citadel",
-    "deshaw",
-    "balyasny",
-    "manaus",
-    "brevanhoward",
-    "marshallwace",
-    "coatue",
-    "vikingglobal",
-    "pershingsquare",
-    "elliottmanagement",
-    "farallon",
-    "wellington",
-    "gsam",
-    "pgim",
-    "neubergerberman",
-    "lazard",
-    "invesco",
-    "franklintempleton",
-    "oaktreecapitalmanagement",
-    "apollo",
-    "aresmanagement",
-    "kkr",
-    "carlyle",
-    "blackstone",
-    "warburgpincus",
-    "akunacapital",
-    "imc",
-    "optiver",
-    "susquehanna",
-    "jumptrading",
-    "drw",
-    "hudsonrivertrading",
-    "flowtraders",
-    "xtxmarkets",
-    "wolverinetrading",
-    "robeco",
-    "ninetyone",
+    "aqr",                    # AQR Capital Management
+    "point72",                # Point72 Asset Management
+    "marshallwace",           # Marshall Wace
+    "apollo",                 # Apollo Global Management
+    "akunacapital",           # Akuna Capital
+    "imc",                    # IMC Trading
+    "jumptrading",            # Jump Trading
+    "flowtraders",            # Flow Traders
+    "vikingglobalinvestors",  # Viking Global Investors
+    "exoduspoint",            # ExodusPoint Capital Management
+    "schonfeld",              # Schonfeld Strategic Advisors
+    "virtu",                  # Virtu Financial
+    "janestreet",             # Jane Street
+    "towerresearchcapital",   # Tower Research Capital
+    "gsacapital",             # GSA Capital
+    "transmarketgroup",       # TransMarket Group
+    "walleyecapital",         # Walleye Capital
+    "pdtpartners",            # PDT Partners
+    "dvtrading",              # DV Trading
 ]
 
 # Lever: api.lever.co/v0/postings/{slug}?mode=json
+# Verified live (200 OK) on 2026-09-13.
 LEVER_COMPANIES = [
-    "brevanhoward",
-    "squarepoint",
-    "cerebras",  # placeholder examples pruned by the 404-skip logic; replace with real finance Lever slugs as found
-    "graham",
-    "hbk",
-    "man",
+    "fortress",  # Fortress Investment Group
+    "gmo",       # GMO (Grantham, Mayo, & van Otterloo)
 ]
 
 # Workday: {tenant}.wd{n}.myworkdayjobs.com -- (tenant, site, wd_number)
-# wd_number varies by company (wd1, wd3, wd5, etc.) and sometimes changes; if a
-# tenant stops resolving, check the company's live careers page URL for the
-# current wd# and site name.
+# NOT independently verified this round -- myworkdayjobs.com itself was down
+# for every tenant tested during the 2026-09-13 verification pass (Workday's
+# own outage page, not a 404), so these remain best-effort guesses at large
+# banks/insurers known to use Workday. wd_number varies by company (wd1, wd3,
+# wd5, etc.) and sometimes changes; if a tenant stops resolving once Workday's
+# service is back, check the company's live careers page URL for the current
+# wd# and site name.
 WORKDAY_COMPANIES = [
     {"company": "Goldman Sachs", "tenant": "gs", "site": "GS", "wd": "wd1"},
     {"company": "JPMorgan Chase", "tenant": "jpmc", "site": "CI_External", "wd": "wd5"},
