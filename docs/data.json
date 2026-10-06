@@ -1,18 +1,7 @@
 {
-  "generated_at": "2026-10-06T04:24:38.666070+00:00",
+  "generated_at": "2026-10-06T14:40:09.141767+00:00",
   "min_salary_usd": 60000,
-  "count": 1,
+  "count": 0,
   "unresolved_count": 23,
-  "jobs": [
-    {
-      "company": "DBS Bank",
-      "title": "Senior Associate / Associate, Market Risk Business & Data Analyst, Risk Management Group",
-      "location": "Singapore - Central",
-      "salary": null,
-      "salary_min_usd": null,
-      "source": "Workday",
-      "url": "https://dbs.wd3.myworkdayjobs.com/job/Singapore---Central/Senior-Associate---Associate--Market-Risk-Business---Data-Analyst--Risk-Management-Group_WD89094",
-      "posted": "Posted 9 Days Ago"
-    }
-  ]
+  "jobs": []
 }
